@@ -28,7 +28,7 @@ const App = () => {
 
   useEffect(() => {
     fetchTenders(); 
-  }, [pageNo, fetchQuantity, sorting, sortBy]);
+  }, [fetchTenders, pageNo, fetchQuantity, sorting, sortBy]);
 
   async function searchTenders() {
     try {
