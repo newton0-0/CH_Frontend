@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App = () => {
   const [tenders, setTenders] = useState([]);
@@ -12,13 +13,16 @@ const App = () => {
 
   const fetchTenders = useCallback(async () => {
     try {
-      const res = await fetch(`/api/all-tenders?page=${pageNo}&quantity=${fetchQuantity}&sorting=${sorting}&sortBy=${sortBy}`);
+      const res = await axios.get(`/api/search-tenders`, {
+        params: {
+          search: searchValue,
+          page: pageNo,
+          quantity: fetchQuantity,
+          sorting,
+          sortBy,
+        },
+      });
 
-      if (!res.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const allTenders = await res.json(); 
       setTenders(allTenders); 
     } catch (err) {
       console.error('Error fetching tenders:', err);
