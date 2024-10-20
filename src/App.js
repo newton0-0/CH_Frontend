@@ -18,8 +18,7 @@ const App = () => {
           page: pageNo,
           quantity: fetchQuantity,
           sorting,
-          sortBy,
-          search: searchValue, // Include searchValue here
+          sortBy
         },
       });
 
