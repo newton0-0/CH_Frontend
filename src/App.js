@@ -13,7 +13,7 @@ const App = () => {
 
   const fetchTenders = useCallback(async () => {
     try {
-      const res = await axios.get(`/api/all-tenders`, {
+      const res = await axios.get(`https://ch-backend.vercel.app/api/all-tenders`, {
         params: {
           page: pageNo,
           quantity: fetchQuantity,
@@ -35,7 +35,7 @@ const App = () => {
 
   const searchTenders = async () => {
     try {
-      const res = await axios.get(`/api/search-tenders`, {
+      const res = await axios.get(`https://ch-backend.vercel.app/api/search-tenders`, {
         params: {
           search: searchValue,
           page: pageNo,
