@@ -23,7 +23,7 @@ const App = () => {
         },
       });
 
-      setTenders(allTenders); 
+      setTenders(res.data); 
     } catch (err) {
       console.error('Error fetching tenders:', err);
       setErrors(err);
