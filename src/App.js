@@ -27,7 +27,7 @@ const App = () => {
       console.error('Error fetching tenders:', err);
       setErrors(err);
     }
-  }, [pageNo, fetchQuantity, sorting, sortBy, searchValue]); // Include searchValue in dependencies
+  }, [pageNo, fetchQuantity, sorting, sortBy]); 
 
   useEffect(() => {
     fetchTenders(); 
