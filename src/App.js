@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios'; // Import axios
+import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 
 const App = () => {
   const [tenders, setTenders] = useState([]);
@@ -13,6 +13,29 @@ const App = () => {
 
   const fetchTenders = useCallback(async () => {
     try {
+      const res = await axios.get(`/api/all-tenders`, {
+        params: {
+          page: pageNo,
+          quantity: fetchQuantity,
+          sorting,
+          sortBy,
+          search: searchValue, // Include searchValue here
+        },
+      });
+
+      setTenders(res.data); 
+    } catch (err) {
+      console.error('Error fetching tenders:', err);
+      setErrors(err);
+    }
+  }, [pageNo, fetchQuantity, sorting, sortBy, searchValue]); // Include searchValue in dependencies
+
+  useEffect(() => {
+    fetchTenders(); 
+  }, [fetchTenders]);
+
+  const searchTenders = async () => {
+    try {
       const res = await axios.get(`/api/search-tenders`, {
         params: {
           search: searchValue,
@@ -24,26 +47,6 @@ const App = () => {
       });
 
       setTenders(res.data); 
-    } catch (err) {
-      console.error('Error fetching tenders:', err);
-      setErrors(err);
-    }
-  }, [pageNo, fetchQuantity, sorting, sortBy]);
-
-  useEffect(() => {
-    fetchTenders(); 
-  }, [fetchTenders]);
-
-  const searchTenders = async () => {
-    try {
-      const res = await fetch(`/api/search-tenders?search=${searchValue}&page=${pageNo}&quantity=${fetchQuantity}&sorting=${sorting}&sortBy=${sortBy}`);
-      
-      if (!res.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const fetchSearchRes = await res.json(); 
-      setTenders(fetchSearchRes); 
     } catch (err) {
       setErrors(err);
       console.log(err);
