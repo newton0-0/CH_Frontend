@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 
 const App = () => {
@@ -10,9 +10,9 @@ const App = () => {
   const [sorting, setSorting] = useState('desc');
   const [sortBy, setSortBy] = useState('tender_value');
 
-  const fetchTenders = async () => {
+  const fetchTenders = useCallback(async () => {
     try {
-      const res = await fetch(`/api/all-tenders?page=${pageNo}&quantity=${fetchQuantity}&sorting=${sorting}&sortBy=${sortBy}`); // Corrected query string concatenation
+      const res = await fetch(`/api/all-tenders?page=${pageNo}&quantity=${fetchQuantity}&sorting=${sorting}&sortBy=${sortBy}`);
 
       if (!res.ok) {
         throw new Error('Network response was not ok');
@@ -24,25 +24,25 @@ const App = () => {
       console.error('Error fetching tenders:', err);
       setErrors(err);
     }
-  };
+  }, [pageNo, fetchQuantity, sorting, sortBy]);
 
   useEffect(() => {
     fetchTenders(); 
-  }, [fetchTenders, pageNo, fetchQuantity, sorting, sortBy]);
+  }, [fetchTenders]);
 
-  async function searchTenders() {
+  const searchTenders = async () => {
     try {
-        const res = await fetch(`/api/search-tenders?search=${searchValue}&page=${pageNo}&quantity=${fetchQuantity}&sorting=${sorting}&sortBy=${sortBy}`);
-        
-        if (!res.ok) {
-            throw new Error('Network response was not ok');
-        }
+      const res = await fetch(`/api/search-tenders?search=${searchValue}&page=${pageNo}&quantity=${fetchQuantity}&sorting=${sorting}&sortBy=${sortBy}`);
+      
+      if (!res.ok) {
+        throw new Error('Network response was not ok');
+      }
 
-        const fetchSearchRes = await res.json(); 
-        setTenders(fetchSearchRes); 
+      const fetchSearchRes = await res.json(); 
+      setTenders(fetchSearchRes); 
     } catch (err) {
-        setErrors(err);
-        console.log(err);
+      setErrors(err);
+      console.log(err);
     }
   }
 
@@ -64,24 +64,26 @@ const App = () => {
 
       {/* Page and Fetch Quantity Details */}
       <div className="row mb-3 justify-content-around">
-        <p className='w-25'>Page No: </p>
+        <p className='w-25'>Page No:</p>
         <input
           className="w-25 form-control d-inline-block"
-          style={{ width: '60px', height: '40px' }}
-          placeholder={pageNo}
-          onChange={e => setPageNo(e.target.value)}
+          type="number"
+          min="1"
+          value={pageNo}
+          onChange={e => setPageNo(Math.max(1, parseInt(e.target.value) || 1))}
         />
         
-        <p className='w-25'>Quantity: </p>
+        <p className='w-25'>Quantity:</p>
         <input
           className="w-25 form-control d-inline-block"
-          style={{ width: '60px', height: '40px' }}
-          placeholder={fetchQuantity}
-          onChange={e => setFetchQuantity(e.target.value)}
+          type="number"
+          min="1"
+          value={fetchQuantity}
+          onChange={e => setFetchQuantity(Math.max(1, parseInt(e.target.value) || 1))}
         />
-        
-        {/* Sorting Options */}
       </div>
+
+      {/* Sorting Options */}
       <div className="row mb-3 justify-content-around">
         <h5 className='col'>Sort By:</h5>
         <select
@@ -112,6 +114,8 @@ const App = () => {
           Next
         </button>
       </div>
+
+      {/* Tenders Table */}
       <table className="table table-striped">
         <thead>
           <tr>
@@ -119,7 +123,7 @@ const App = () => {
             <th>Tender Reference Number</th>
             <th>Tender ID</th>
             <th>Bid Submission End Date</th>
-            <th>Tender value</th>
+            <th>Tender Value</th>
             <th>Tender URL</th>
           </tr>
         </thead>
