@@ -26,7 +26,7 @@ async function checkEmp() {
 
     console.log('Token Verification Response:', response.data);
 
-    if (response.data.code === 200 && response.data.role == "emp") {
+    if (response.data.code === 200 && response.data.role === "emp") {
       // Redirect to EmployeeDashboard
       return true;
     } else {
