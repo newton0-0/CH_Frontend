@@ -35,6 +35,19 @@ const EmployeeDashboard = () => {
     setShowModal(false);
   };
 
+function formatNumber(num) {
+  if (num === null || num === undefined) return 'Invalid number';
+
+  const units = ['', 'K', 'M', 'B', 'T'];
+  const tier = Math.floor(Math.log10(Math.abs(num)) / 3); // Determine the unit tier
+  const suffix = units[tier] || ''; // Get the appropriate suffix
+  const scale = Math.pow(10, tier * 3); // Determine the scale
+  const scaledNum = num / scale; // Scale the number down
+
+  // Format the number with 2 decimal places if it has decimals, otherwise no decimals
+  return scaledNum.toFixed(scaledNum % 1 !== 0 ? 2 : 0) + suffix;
+}
+
   // Fetch all tenders
   const fetchTenders = useCallback(async () => {
     try {
