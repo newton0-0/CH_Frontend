@@ -11,7 +11,6 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const EmployeeDashboard = () => {
   const [tenders, setTenders] = useState([]);
-  const [highlightTenders, setHighlightTenders] = useState([]);
   const [errors, setErrors] = useState(null);
   const [searchValue, setSearchValue] = useState('');
   const [fetchQuantity, setFetchQuantity] = useState(20);
@@ -24,9 +23,6 @@ const EmployeeDashboard = () => {
 
   const [showComparisonModal, setShowComparisonModal] = useState(false);
   const [showWishlistModal, setShowWishlistModal] = useState(false);
-
-  // Load wishlist from cookies or initialize with an empty array
-  const [wishlistedTenders, setWishlistedTenders] = useState(() => cookie.load('userWishlist') || []);
 
   const navigate = useNavigate();
 
