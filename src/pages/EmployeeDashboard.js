@@ -178,8 +178,8 @@ function formatNumber(num) {
         </div>
       </div>
 
-      {/* Highlights Section */}
-      <div className="container">
+  {/* Highlights Section */}
+<div className="container">
   <h3>Highlights</h3>
 
   {/* Reaching Deadline Tenders */}
@@ -222,6 +222,30 @@ function formatNumber(num) {
     </div>
   </div>
 
+  {/* Tenders By Works */}
+  <div className="row">
+    <h5>Tenders By Works</h5>
+    {highlightTenders.tendersByWorks?.map((tender, index) => (
+      <div className="col" key={index}>
+        <h6>{tender._id} - {tender.count} tenders</h6>
+        <ul className="list-group mb-3" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+          {tender.tenders.map((subTender, subIndex) => (
+            <li className="list-group-item" key={subIndex}>
+              <span
+                className="d-inline-block text-truncate w-75"
+                title={subTender.tender_title}
+                onClick={() => { setSelectedTender(subTender); setShowModal(true); }}
+              >
+                {subTender.tender_title}
+              </span>
+              <span className="float-right">{formatNumber(subTender.tender_value)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</div>
       {/* Tenders Table */}
       <table className="table table-striped">
         <thead>
