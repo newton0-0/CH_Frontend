@@ -4,9 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import cookie from 'react-cookies';
 import { useNavigate } from 'react-router-dom';
 
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-
 import TenderDetailsModal from '../utilities/TenderDetailsModal';
 import ComparisonModal from './ComparisonPage';
 import WishlistTenders from './WishlistTenders';
@@ -31,28 +28,12 @@ const EmployeeDashboard = () => {
   // Load wishlist from cookies or initialize with an empty array
   const [wishlistedTenders, setWishlistedTenders] = useState(() => cookie.load('userWishlist') || []);
 
-  function formatNumber(num) {
-    if (num === null || num === undefined) return 'Invalid number';
-  
-    const units = ['', 'K', 'M', 'B', 'T'];
-    const tier = Math.floor(Math.log10(Math.abs(num)) / 3); // Determine the unit tier
-    const suffix = units[tier] || ''; // Get the appropriate suffix
-    const scale = Math.pow(10, tier * 3); // Determine the scale
-    const scaledNum = num / scale; // Scale the number down
-  
-    // Format the number with 2 decimal places if it has decimals, otherwise no decimals
-    return scaledNum.toFixed(scaledNum % 1 !== 0 ? 2 : 0) + suffix;
-  }
-
   const navigate = useNavigate();
 
   const closeModal = () => {
     setSelectedTender(null);
     setShowModal(false);
   };
-
-  // Check if a tender is wishlisted
-  const isWishlisted = (tenderId) => wishlistedTenders.includes(tenderId);
 
   // Fetch all tenders
   const fetchTenders = useCallback(async () => {
@@ -88,7 +69,6 @@ const EmployeeDashboard = () => {
     fetchHighlightTenders();  // Fetch highlights
   }, [fetchTenders, fetchHighlightTenders]);
 
-  // Search tenders based on search value
   const searchTenders = async () => {
     try {
       const res = await axios.get(process.env.REACT_APP_BASE_URL + `/search-tenders`, {
@@ -107,14 +87,13 @@ const EmployeeDashboard = () => {
     }
   };
 
-    // Logout Functionality
-    const handleLogout = () => {
-      cookie.remove('auth', { path: '/' });
-      cookie.remove('userWishlist', { path: '/' });
-      cookie.remove('userIncomparison', { path: '/' });
-  
-      navigate('/user-page');
-    };
+  // Logout Functionality
+  const handleLogout = () => {
+    cookie.remove('auth', { path: '/' });
+    cookie.remove('userWishlist', { path: '/' });
+    cookie.remove('userIncomparison', { path: '/' });
+    navigate('/user-page');
+  };
 
   return (
     <div className="container">
@@ -140,73 +119,60 @@ const EmployeeDashboard = () => {
         <button className="col btn btn-primary d-inline-block mb-1" onClick={searchTenders}>Search</button>
       </div>
 
+      {/* Controls for Setting Fetch Quantity, Page No., Sorting */}
+      <div className="row mb-3">
+        <div className="col-md-3">
+          <label>Fetch Quantity</label>
+          <select 
+            className="form-control" 
+            value={fetchQuantity} 
+            onChange={e => setFetchQuantity(Number(e.target.value))}
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
+        <div className="col-md-3">
+          <label>Page Number</label>
+          <input 
+            type="number" 
+            className="form-control" 
+            value={pageNo} 
+            onChange={e => setPageNo(Number(e.target.value))}
+          />
+        </div>
+        <div className="col-md-3">
+          <label>Sort By</label>
+          <select 
+            className="form-control" 
+            value={sortBy} 
+            onChange={e => setSortBy(e.target.value)}
+          >
+            <option value="tender_value">Tender Value</option>
+            <option value="bid_end_date">Bid End Date</option>
+            <option value="tender_title">Tender Title</option>
+          </select>
+        </div>
+        <div className="col-md-3">
+          <label>Sorting</label>
+          <select 
+            className="form-control" 
+            value={sorting} 
+            onChange={e => setSorting(e.target.value)}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+      </div>
+
       {/* Highlights Section */}
       <div className="container">
         <h3>Highlights</h3>
-
         {/* Reaching Deadline Tenders */}
-        <div className="row mb-4">
-          <div className="col-6">
-            <h5>Reaching Deadline Tenders</h5>
-            <ul className="list-group" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-              {highlightTenders.reachingDeadlineTenders?.map((tender, index) => (
-                <li className="list-group-item" key={index}>
-                  <span
-                    className="d-inline-block text-truncate w-75"
-                    title={tender.tender_title}
-                    onClick={() => { setSelectedTender(tender); setShowModal(true); }}
-                  >
-                    {tender.tender_title}
-                  </span>
-                  <span className="float-right">{new Date(tender.bid_end_date).toLocaleDateString()}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Best Valued Tenders */}
-          <div className="col-6">
-            <h5>Best Valued Tenders</h5>
-            <ul className="list-group" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-              {highlightTenders.bestValuedTenders?.map((tender, index) => (
-                <li className="list-group-item" key={index}>
-                  <span
-                    className="d-inline-block text-truncate w-75"
-                    title={tender.tender_title}
-                    onClick={() => { setSelectedTender(tender); setShowModal(true); }}
-                  >
-                    {tender.tender_title}
-                  </span>
-                  <span className="float-right">{formatNumber(tender.tender_value)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Other Tender Sections */}
-        <div className="row">
-          <h5>Tenders By Works</h5>
-          {highlightTenders.tendersByWorks?.map((tender, index) => (
-            <div className="col" key={index}>
-              <h6>{tender._id} - {tender.count} tenders</h6>
-              <ul className="list-group mb-3" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                {tender.docs.map((doc, i) => (
-                  <li className="list-group-item" key={i}>
-                    <span
-                      className="d-inline-block text-truncate"
-                      style={{ maxWidth: '300px' }}
-                      title={doc.tender_title}
-                      onClick={() => { setSelectedTender(doc); setShowModal(true); }}
-                    >
-                      {doc.tender_title}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+        {/* [existing highlights code] */}
       </div>
 
       {/* Tenders Table */}
@@ -240,8 +206,6 @@ const EmployeeDashboard = () => {
               <td>{formatNumber(tender.tender_value)}</td>
               <td>
                 <a href={tender.tender_url} target="_blank" rel="noopener noreferrer">View Tender</a>
-              </td>
-              <td>
               </td>
             </tr>
           ))}
