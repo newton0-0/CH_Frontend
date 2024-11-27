@@ -68,7 +68,6 @@ const App = () => {
         {/* Protected Routes */}
         <Route path="/employee-dashboard" element={isAuthenticated ? <EmployeeDashboard /> : <UserPage />} />
         <Route path="/user-page" element={<UserPage />} />
-        <Route path="/compare-tenders" element={<ComparisonPage />} />
 
         {/* Fallback route for unknown URLs */}
         <Route path="*" element={<NotFound />} />
