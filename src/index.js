@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 
 import Cookies from 'js-cookie';
@@ -16,31 +16,6 @@ import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
-// Check if user is authenticated
-async function checkEmp() {
-  try {
-    const response = await axios.get(process.env.REACT_APP_BASE_URL + '/api/user/verify-token', {
-      headers: {
-        Authorization: `${Cookies.get('auth')}`
-      }
-    });
-
-    console.log('Token Verification Response:', response.data);
-
-    if (response.data.code === 200 && response.data.role === "emp") {
-      // Redirect to EmployeeDashboard
-      return true;
-    } else {
-      // Redirect to Login Page
-      return false;
-    }
-  } catch (error) {
-    console.error('Token Verification Error:', error);
-
-    return false;
-  }
-}
-
 // Error page component for non-existent URLs
 const NotFound = () => {
   return (
@@ -51,21 +26,58 @@ const NotFound = () => {
   );
 };
 
-root.render(
-  <BrowserRouter>
-    <Routes>
-      {/* Landing page as the default route */}
-      <Route exact path="/" element={<LandingPage />} />
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // State to hold authentication status
 
-      <Route exact path="/employee-dashboard" element={checkEmp() ? <EmployeeDashboard /> : <UserPage />} />
-      <Route exact path="/user-page" element={<UserPage />} />
-      <Route exact path="/compare-tenders" element={<ComparisonPage />} />
+  // Check if user is authenticated
+  useEffect(() => {
+    const checkEmp = async () => {
+      try {
+        const response = await axios.get(process.env.REACT_APP_BASE_URL + '/api/user/verify-token', {
+          headers: {
+            Authorization: `Bearer ${Cookies.get('auth')}`
+          }
+        });
 
-      {/* Add a fallback route for unknown URLs */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  </BrowserRouter>
-);
+        console.log('Token Verification Response:', response.data);
+
+        if (response.data.code === 200 && response.data.role === 'emp') {
+          setIsAuthenticated(true); // User is authenticated as employee
+        } else {
+          setIsAuthenticated(false); // User is not authenticated as employee
+        }
+      } catch (error) {
+        console.error('Token Verification Error:', error);
+        setIsAuthenticated(false); // Set to false if token verification fails
+      }
+    };
+
+    checkEmp();
+  }, []);
+
+  if (isAuthenticated === null) {
+    return <div>Loading...</div>; // Display loading state while authentication is being checked
+  }
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Landing page as the default route */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Protected Routes */}
+        <Route path="/employee-dashboard" element={isAuthenticated ? <EmployeeDashboard /> : <UserPage />} />
+        <Route path="/user-page" element={<UserPage />} />
+        <Route path="/compare-tenders" element={<ComparisonPage />} />
+
+        {/* Fallback route for unknown URLs */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+root.render(<App />);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
