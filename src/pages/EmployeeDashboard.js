@@ -180,10 +180,47 @@ function formatNumber(num) {
 
       {/* Highlights Section */}
       <div className="container">
-        <h3>Highlights</h3>
-        {/* Reaching Deadline Tenders */}
-        {/* [existing highlights code] */}
-      </div>
+  <h3>Highlights</h3>
+
+  {/* Reaching Deadline Tenders */}
+  <div className="row mb-4">
+    <div className="col-6">
+      <h5>Reaching Deadline Tenders</h5>
+      <ul className="list-group" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+        {highlightTenders.reachingDeadlineTenders?.map((tender, index) => (
+          <li className="list-group-item" key={index}>
+            <span
+              className="d-inline-block text-truncate w-75"
+              title={tender.tender_title}
+              onClick={() => { setSelectedTender(tender); setShowModal(true); }}
+            >
+              {tender.tender_title}
+            </span>
+            <span className="float-right">{new Date(tender.bid_end_date).toLocaleDateString()}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {/* Best Valued Tenders */}
+    <div className="col-6">
+      <h5>Best Valued Tenders</h5>
+      <ul className="list-group" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+        {highlightTenders.bestValuedTenders?.map((tender, index) => (
+          <li className="list-group-item" key={index}>
+            <span
+              className="d-inline-block text-truncate w-75"
+              title={tender.tender_title}
+              onClick={() => { setSelectedTender(tender); setShowModal(true); }}
+            >
+              {tender.tender_title}
+            </span>
+            <span className="float-right">{formatNumber(tender.tender_value)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
 
       {/* Tenders Table */}
       <table className="table table-striped">
