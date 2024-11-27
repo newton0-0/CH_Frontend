@@ -1,4 +1,4 @@
-import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -7,6 +7,7 @@ import axios from 'axios';
 
 import './index.css';
 
+import LandingPage from './pages/LandingPage'; // Import the LandingPage component
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import UserPage from './pages/UserPage';
 import ComparisonPage from './pages/ComparisonPage';
@@ -18,7 +19,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 // Check if user is authenticated
 async function checkEmp() {
   try {
-    const response = await axios.get( process.env.REACT_APP_BASE_URL + '/api/user/verify-token', {
+    const response = await axios.get(process.env.REACT_APP_BASE_URL + '/api/user/verify-token', {
       headers: {
         Authorization: `${Cookies.get('auth')}`
       }
@@ -40,12 +41,28 @@ async function checkEmp() {
   }
 }
 
+// Error page component for non-existent URLs
+const NotFound = () => {
+  return (
+    <div style={{ textAlign: 'center', padding: '50px' }}>
+      <h1>404 - Page Not Found</h1>
+      <p>This URL doesn't exist. Please check the address or return to the homepage.</p>
+    </div>
+  );
+};
+
 root.render(
   <BrowserRouter>
     <Routes>
-      <Route path="/employee-dashboard" element={checkEmp()? <EmployeeDashboard/> : <UserPage />}></Route>
-      <Route path="/user-page" element={<UserPage />}></Route>
-      <Route path='/compare-tenders' element={<ComparisonPage />}></Route>
+      {/* Landing page as the default route */}
+      <Route path="/" element={<LandingPage />} />
+
+      <Route path="/employee-dashboard" element={checkEmp() ? <EmployeeDashboard /> : <UserPage />} />
+      <Route path="/user-page" element={<UserPage />} />
+      <Route path="/compare-tenders" element={<ComparisonPage />} />
+
+      {/* Add a fallback route for unknown URLs */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>
 );
