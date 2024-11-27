@@ -11,6 +11,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const EmployeeDashboard = () => {
   const [tenders, setTenders] = useState([]);
+  const [highlightTenders, setHighlightTenders] = ([]);
   const [errors, setErrors] = useState(null);
   const [searchValue, setSearchValue] = useState('');
   const [fetchQuantity, setFetchQuantity] = useState(20);
