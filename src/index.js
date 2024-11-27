@@ -55,11 +55,11 @@ root.render(
   <BrowserRouter>
     <Routes>
       {/* Landing page as the default route */}
-      <Route path="/" element={<LandingPage />} />
+      <Route exact path="/" element={<LandingPage />} />
 
-      <Route path="/employee-dashboard" element={checkEmp() ? <EmployeeDashboard /> : <UserPage />} />
-      <Route path="/user-page" element={<UserPage />} />
-      <Route path="/compare-tenders" element={<ComparisonPage />} />
+      <Route exact path="/employee-dashboard" element={checkEmp() ? <EmployeeDashboard /> : <UserPage />} />
+      <Route exact path="/user-page" element={<UserPage />} />
+      <Route exact path="/compare-tenders" element={<ComparisonPage />} />
 
       {/* Add a fallback route for unknown URLs */}
       <Route path="*" element={<NotFound />} />
