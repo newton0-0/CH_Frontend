@@ -65,14 +65,14 @@ function formatNumber(num) {
 
   // Fetch highlight tenders
   const fetchHighlightTenders = useCallback(async () => {
-    try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/dashboard/highlight-tenders`);
-      setHighlightTenders(res.data.data);
-    } catch (err) {
-      console.error('Error fetching highlight tenders:', err);
-      setErrors(err);
-    }
-  }, []);
+  try {
+    const res = await axios.get(process.env.REACT_APP_BASE_URL + `/dashboard/highlight-tenders`);
+    setHighlightTenders(res.data.data);
+  } catch (err) {
+    console.error('Error fetching highlight tenders:', err);
+    setErrors(err);
+  }
+}, [setHighlightTenders]);  // Add setHighlightTenders as a dependency
 
   useEffect(() => {
     fetchTenders();
