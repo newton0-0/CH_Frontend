@@ -13,7 +13,6 @@ const TenderDetailsModal = ({ tender, show, onClose }) => {
     cookie.load('user')?.wishlistedTenders?.includes(tender?.tender_id) || false
   );
   const [isCompared, setIsCompared] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
 
   if (!tender) return null;
 
