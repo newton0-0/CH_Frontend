@@ -1,17 +1,67 @@
-import React, { useState } from 'react';
-import cookie from 'react-cookies';
+import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import axios from 'axios';
 
 const ComparisonModal = () => {
   const [showModal, setShowModal] = useState(false); // State to handle modal visibility
   let remarks = {}; // Object to store remarks for each row
 
-  // Load tenders data from cookies
-  const tenders = cookie.load('userIncomparison') || [];
+  const [tenders, setTenders] = useState([null]);
+
+  async function removeTenderFromComparison(tenderId) {
+    try {
+      const response = await axios.get(process.env.REACT_APP_BASE_URL + `/user/remove-from-comparison`, {
+        params: {
+          tenderId: tenderId
+        },
+        headers: {
+          Authorization: `${Cookies.get('auth')}`
+        }
+      });
+      console.log(response.data);
+      setTenders((prevTenders) => prevTenders.filter((tender) => tender._id !== tenderId));
+    } catch (error) {
+      console.error('Error removing tender from comparison:', error);
+    }
+  }
+
+  async function removeAllTendersFromComparison() {
+    try {
+      const response = await axios.get(process.env.REACT_APP_BASE_URL + '/user/remove-all-from-comparison', {
+        headers: {
+          Authorization: `${Cookies.get('auth')}`
+        }
+      });
+      console.log(response.data);
+      setTenders([]);
+    } catch (error) {
+      console.error('Error removing all tenders from comparison:', error);
+    }
+  }
+  
+  // Load wishlist from api call
+  useEffect(() => {
+    axios
+      .get(process.env.REACT_APP_BASE_URL + '/user/user-comparison', {
+        headers: {
+          Authorization: `${Cookies.get('auth')}`
+        }
+      })
+      .then((response) => {
+        console.log(response.data.data);
+        setTenders(response.data.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching in comparison tenders:', error);
+      });
+  }, []);
 
   if (!tenders || tenders.length === 0) {
     return <div className="alert alert-info">No tenders available for comparison.</div>;
@@ -86,6 +136,15 @@ const ComparisonModal = () => {
                             title={`View details for ${tender.tender_title}`}
                           >
                             {tender.tender_title}
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
+                              onClick={async () => {
+                                await removeTenderFromComparison(tender._id);
+                              }}
+                            >
+                              <RemoveCircleOutlineIcon />
+                            </button>
                           </th>
                         ))}
                         <th
@@ -134,9 +193,15 @@ const ComparisonModal = () => {
                   </table>
                 </div>
               </div>
-              <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
-                  Close
+              <div className="modal-footer w-100">
+              <button
+                  className="btn btn-outline-danger"
+                  style={{ borderRadius: '1rem', float: 'left' }}
+                  onClick={async () => {
+                    await removeAllTendersFromComparison();
+                  }}
+                >
+                  <RemoveCircleOutlineIcon /> Clear All
                 </button>
                 <button
                   className="btn btn-primary"

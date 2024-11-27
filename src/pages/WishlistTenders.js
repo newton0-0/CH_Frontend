@@ -38,7 +38,7 @@ const WishlistModal = () => {
 
   const removeTenderFromWishlist = async (tenderId) => {
     try {
-      await axios.delete(process.env.REACT_APP_BASE_URL + '/user/remove-from-wishlist', {
+      await axios.get(process.env.REACT_APP_BASE_URL + '/user/remove-from-wishlist', {
         headers: {
           Authorization: `${Cookies.get('auth')}`
         },

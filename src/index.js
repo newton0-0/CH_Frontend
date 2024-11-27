@@ -10,7 +10,7 @@ import './index.css';
 import LandingPage from './pages/LandingPage';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import UserPage from './pages/UserPage';
-import ComparisonPage from './pages/ComparisonPage';
+import AdminDashboard from './pages/AdminDashboard';
 
 import reportWebVitals from './reportWebVitals';
 
@@ -21,7 +21,7 @@ const NotFound = () => {
   return (
     <div style={{ textAlign: 'center', padding: '50px' }}>
       <h1>404 - Page Not Found</h1>
-      <p>This URL doesn't exist. Please check the address or return to the homepage.</p>
+      <p>This URL doesn't exist. Please check the address or return to the <a href="/">home page</a>.</p>
     </div>
   );
 };
@@ -33,9 +33,9 @@ const App = () => {
   useEffect(() => {
     const checkEmp = async () => {
       try {
-        const response = await axios.get(process.env.REACT_APP_BASE_URL + '/api/user/verify-token', {
+        const response = await axios.get(process.env.REACT_APP_BASE_URL + '/user/verify-token', {
           headers: {
-            Authorization: `Bearer ${Cookies.get('auth')}`
+            Authorization: `${Cookies.get('auth')}`
           }
         });
 
@@ -68,6 +68,8 @@ const App = () => {
         {/* Protected Routes */}
         <Route path="/employee-dashboard" element={isAuthenticated ? <EmployeeDashboard /> : <UserPage />} />
         <Route path="/user-page" element={<UserPage />} />
+
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
         {/* Fallback route for unknown URLs */}
         <Route path="*" element={<NotFound />} />

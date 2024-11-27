@@ -1,86 +1,114 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // For API calls
 import 'bootstrap/dist/css/bootstrap.min.css';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
-// import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
-
 import cookie from 'react-cookies';
 
 const TenderDetailsModal = ({ tender, show, onClose }) => {
-  const [isWishlisted, setIsWishlisted] = useState(
-    cookie.load('user')?.wishlistedTenders?.includes(tender?.tender_id) || false
-  );
-  const [isCompared, setIsCompared] = useState(false);
+  const [wishlistedTenders, setWishlistedTenders] = useState([]);
+  const [userInComparison, setUserInComparison] = useState([]);
 
-  if (!tender) return null;
-
-  // Base URL from environment
   const baseURL = process.env.REACT_APP_BASE_URL;
+  const token = `Bearer${cookie.load('auth')?.slice(6)}`;
 
-  // Function to convert keys to well-mannered English format
-  const formatKey = (key) => {
-    return key
-      .replace(/_/g, ' ') // Replace underscores with spaces
-      .replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize each word
-      .replace(/(\bid\b|\bboq\b)/gi, (match) => match.toUpperCase()); // Keep specific abbreviations in uppercase
-  };
+  // Fetch wishlist and comparison data on load
+  useEffect(() => {
+    const fetchWishlistAndComparison = async () => {
+      try {
+        const [wishlistResponse, comparisonResponse] = await Promise.all([
+          axios.get(`${baseURL}/user/user-wishlist`, {
+            headers: { Authorization: token },
+          }),
+          axios.get(`${baseURL}/user/user-comparison`, {
+            headers: { Authorization: token },
+          }),
+        ]);
+        console.log("wl : ", wishlistResponse.data.data);
+        console.log("cmp : ", comparisonResponse.data.data);
+        setWishlistedTenders(wishlistResponse.data.data || []);
+        setUserInComparison(comparisonResponse.data.data || []);
+      } catch (err) {
+        console.error('Error fetching wishlist or comparison:', err.message);
+      }
+    };
 
-  // Function to format dates in a localized, readable manner
-  const formatDate = (value) => {
-    if (!value || isNaN(new Date(value))) return value; // If not a valid date, return as-is
-    return new Date(value).toLocaleDateString(undefined, {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+    fetchWishlistAndComparison();
+  }, [baseURL, token]);
 
-  // Function to handle adding/removing from wishlist
+  // Helper functions
+  const isWishlisted = Object.values(wishlistedTenders).some((wlTender) => wlTender.tender_id === tender?.tender_id);
+  const isCompared = Object.values(userInComparison).some((cmpTender) => cmpTender.tender_id === tender?.tender_id);
+
+  const formatKey = (key) =>
+    key
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase())
+      .replace(/(\bid\b|\bboq\b)/gi, (match) => match.toUpperCase());
+
+  const formatDate = (value) =>
+    !value || isNaN(new Date(value))
+      ? value
+      : new Date(value).toLocaleDateString(undefined, {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+
+  // Wishlist toggle
   const toggleWishlist = async () => {
+    const endpoint = isWishlisted
+      ? '/user/remove-from-wishlist'
+      : '/user/add-to-wishlist';
+
     try {
-      const endpoint = isWishlisted ? '/user/remove-from-wishlist' : '/user/add-to-wishlist';
-      const token = "Bearer" + cookie.load('auth')?.slice(6);
-      console.log('Token:', token);
-      await axios.get(`${baseURL}${endpoint}`, { 
-        params: { tenderId: tender._id }, 
-        headers: { 
-          "Authorization": token
-        }
+      await axios.get(`${baseURL}${endpoint}`, {
+        params: { tenderId: tender._id },
+        headers: { Authorization: token },
       });
 
-      setIsWishlisted(!isWishlisted);
       alert(`Tender "${tender.tender_title}" has been ${isWishlisted ? 'removed from' : 'added to'} the wishlist.`);
+      setWishlistedTenders((prev) =>
+        isWishlisted
+          ? prev.filter((wlTender) => wlTender.tender_id !== tender.tender_id)
+          : [...prev, tender]
+      );
     } catch (err) {
       console.error('Error toggling wishlist:', err.message);
       alert('Failed to update wishlist. Please try again.');
     }
   };
 
-  // Function to handle adding/removing from comparison
+  // Comparison toggle
   const toggleComparison = async () => {
+    const endpoint = isCompared
+      ? '/user/remove-from-comparison'
+      : '/user/add-to-comparison';
+  
     try {
-      const endpoint = isCompared ? '/user/remove-from-comparison' : '/user/add-to-comparison';
-      const token = "Bearer" + cookie.load('auth')?.slice(6); // Extract token from cookies
-      console.log('Token:', token);
-      
-      // Make the API request to either add or remove from comparison
-      await axios.get(`${baseURL}${endpoint}`, { 
-        params: { tender_id: tender.tender_id }, // Ensure tender_id is correct
-        headers: { 
-          "Authorization": token
-        }
+      await axios.get(`${baseURL}${endpoint}`, {
+        params: { tenderId: tender._id },
+        headers: { Authorization: token },
       });
-
-      setIsCompared(!isCompared);
+  
       alert(`Tender "${tender.tender_title}" has been ${isCompared ? 'removed from' : 'added to'} the comparison.`);
+  
+      // Update the comparison state safely
+      setUserInComparison((prev = []) => {
+        if (!Array.isArray(prev)) prev = []; // Ensure `prev` is an array
+        return isCompared
+          ? prev.filter((cmpTender) => cmpTender.tender_id !== tender.tender_id)
+          : [...prev, tender];
+      });
     } catch (err) {
       console.error('Error toggling comparison:', err.message);
       alert('Failed to update comparison. Please try again.');
     }
-  };
+  };  
+
+  if (!tender) return null;
 
   return (
     <div
@@ -110,7 +138,6 @@ const TenderDetailsModal = ({ tender, show, onClose }) => {
             </table>
           </div>
           <div className="modal-footer">
-            {/* Wishlisting Button */}
             <button
               className="btn btn-outline-danger"
               onClick={toggleWishlist}
@@ -118,8 +145,6 @@ const TenderDetailsModal = ({ tender, show, onClose }) => {
             >
               {isWishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />} Wishlist
             </button>
-
-            {/* Comparison Button */}
             <button
               className="btn btn-outline-warning"
               onClick={toggleComparison}
@@ -127,8 +152,6 @@ const TenderDetailsModal = ({ tender, show, onClose }) => {
             >
               <CompareArrowsIcon /> {isCompared ? 'Remove from' : 'Add to'} Comparison
             </button>
-
-            {/* Close Button */}
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Close
             </button>

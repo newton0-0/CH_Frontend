@@ -2,17 +2,15 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import cookie from 'react-cookies';
+import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
 import TenderDetailsModal from '../utilities/TenderDetailsModal';
-import ComparisonModal from './ComparisonPage';
-import WishlistTenders from './WishlistTenders';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 
-const EmployeeDashboard = () => {
+const AdminDashboard = () => {
   const [tenders, setTenders] = useState([]);
-  const [highlightTenders, setHighlightTenders] = useState([]);
   const [errors, setErrors] = useState(null);
   const [searchValue, setSearchValue] = useState('');
   const [fetchQuantity, setFetchQuantity] = useState(20);
@@ -21,10 +19,58 @@ const EmployeeDashboard = () => {
   const [sortBy, setSortBy] = useState('tender_value');
   const [selectedTender, setSelectedTender] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [showComparisonModal, setShowComparisonModal] = useState(false);
-  const [showWishlistModal, setShowWishlistModal] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAllTenders, setShowAllTenders] = useState(false);
+
+  const [pendingUsers, setPendingUsers] = useState(() => fetchPendingUsers());
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
+  async function fetchPendingUsers () {
+    const res = await axios.get(process.env.REACT_APP_BASE_URL + `/admin/pending-users`, {
+        headers: {
+            Authorization: `${Cookies.get('auth')}`
+        }
+    });
+    console.log("lo : ", res.data);
+    return res.data;
+    }
+
+  // Function to approve user
+  async function approveUser(userId, role) {
+    console.log(`User ${userId} approved as Employee`);
+    
+    const res = await axios.post(process.env.REACT_APP_BASE_URL + `/admin/approve-user`, {
+        id: userId,
+        role: role
+    }, {
+        headers: {
+            Authorization: `${Cookies.get('auth')}`
+        }
+    });
+
+    setPendingUsers((prev) => prev.filter((user) => user.id !== userId));
+  };
+
+  // Function to handle search
+  const handleUserSearch = async (e) => {
+    e.preventDefault();
+
+    console.log("searchTerm", Cookies.get('auth'));
+
+    const res = await axios.get(process.env.REACT_APP_BASE_URL + `/admin/search-user`, {}, {
+        params: {
+            search: searchTerm
+        },
+        headers: {
+            Authorization: `${Cookies.get('auth')}`
+        }
+    });
+
+    const mockResults = res.data;
+    setSearchResults(mockResults);
+  };
 
   function formatNumber(num) {
     if (num === null || num === undefined) return 'Invalid number';
@@ -44,6 +90,25 @@ const EmployeeDashboard = () => {
     setShowModal(false);
   };
 
+  async function handleHideTender(tenderId) {
+    try {
+      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/admin/hide-tender`, {
+        params: {
+          tenderId: tenderId
+        },
+        headers: {
+          Authorization: `${Cookies.get('auth')}`
+        }
+      });
+      console.log(res.data);
+      alert("Tender hidden successfully!");
+      fetchTenders();
+    } catch (err) {
+      console.error('Error hiding tender:', err);
+      setErrors(err);
+    }
+  }
+
   // Fetch all tenders
   const fetchTenders = useCallback(async () => {
     try {
@@ -61,20 +126,17 @@ const EmployeeDashboard = () => {
       setErrors(err);
     }
   }, [pageNo, fetchQuantity, sorting, sortBy]);
-  // Fetch highlight tenders
-  const fetchHighlightTenders = useCallback(async () => {
+
+  const fetchUnapprovedUsers = useCallback(async () => {
     try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/dashboard/highlight-tenders`);
-      setHighlightTenders(res.data.data);
+      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/admin/unapproved-users`);
+      setPendingUsers(res.data);
     } catch (err) {
-      console.error('Error fetching highlight tenders:', err);
+      console.error('Error fetching unapproved users:', err);
       setErrors(err);
     }
-  }, []);
-  useEffect(() => {
-    fetchTenders();
-    fetchHighlightTenders();  // Fetch highlights
-  }, [fetchTenders, fetchHighlightTenders]);
+  }, [pendingUsers]);
+  
   // Search tenders based on search value
   const searchTenders = async () => {
     try {
@@ -118,14 +180,6 @@ const EmployeeDashboard = () => {
       >
         <Brightness4Icon />
       </button>
-      <ComparisonModal
-        show={showComparisonModal}
-        onClose={() => setShowComparisonModal(false)}
-      />
-      <WishlistTenders
-        show={showWishlistModal}
-        onClose={() => setShowWishlistModal(false)}
-      />
       <TenderDetailsModal
         tender={selectedTender}
         show={showModal}
@@ -155,71 +209,72 @@ const EmployeeDashboard = () => {
         />
         <button className="col btn btn-primary d-inline-block mb-1" style={{ maxWidth: '100px' }} onClick={searchTenders}>Search</button>
       </div>
-      {/* Highlights Section */}
-      <div className="container">
-        <h3>Highlights</h3>
-        {/* Reaching Deadline Tenders */}
-        <div className="row mb-4">
-          <div className="col-6">
-            <h5>Reaching Deadline Tenders</h5>
-            <ul className="list-group" style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid red' }}>
-              {highlightTenders.reachingDeadlineTenders?.map((tender, index) => (
-                <li className="list-group-item" key={index}>
-                  <span
-                    className="d-inline-block text-truncate w-75"
-                    title={tender.tender_title}
-                    onClick={() => { setSelectedTender(tender); setShowModal(true); }}
-                  >
-                    {tender.tender_title}
-                  </span>
-                  <span className="float-right">{new Date(tender.bid_end_date).toLocaleDateString()}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          {/* Best Valued Tenders */}
-          <div className="col-6">
-            <h5>Best Valued Tenders</h5>
-            <ul className="list-group" style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid green' }}>
-              {highlightTenders.bestValuedTenders?.map((tender, index) => (
-                <li className="list-group-item" key={index}>
-                  <span
-                    className="d-inline-block text-truncate w-75"
-                    title={tender.tender_title}
-                    onClick={() => { setSelectedTender(tender); setShowModal(true); }}
-                  >
-                    {tender.tender_title}
-                  </span>
-                  <span className="float-right">{formatNumber(tender.tender_value)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        {/* Other Tender Sections */}
-        <div className="row">
-          <h5>Tenders By Works</h5>
-          {highlightTenders.tendersByWorks?.map((tender, index) => (
-            <div className="col" key={index}>
-              <h6>{tender._id} - {tender.count} tenders</h6>
-              <ul className="list-group mb-3" style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid blue' }}>
-                {tender.docs.map((doc, i) => (
-                  <li className="list-group-item" key={i}>
-                    <span
-                      className="d-inline-block text-truncate"
-                      style={{ maxWidth: '300px' }}
-                      title={doc.tender_title}
-                      onClick={() => { setSelectedTender(doc); setShowModal(true); }}
-                    >
-                      {doc.tender_title}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+
+      <h2 className="text-center">Admin User Management</h2>
+
+      {/* Row for Pending Users */}
+      <div className="row mt-4">
+        <h4>Pending User Approvals</h4>
+        {Object.values(pendingUsers).map((user) => (
+          <div className="row mb-2 align-items-center" key={user.id}>
+            <div className="col-4">
+              <strong>{user.name}</strong> ({user.email})
             </div>
-          ))}
-        </div>
+            <div className="col-8 d-flex justify-content-between">
+              <button
+                className="btn btn-success"
+                onClick={() => approveUser(user.id, "emp")}
+              >
+                Approve as Employee
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => approveUser(user.id, "admin")}
+              >
+                Approve as Admin
+              </button>
+            </div>
+          </div>
+        ))}
+        {pendingUsers.length === 0 && (
+          <div className="alert alert-info">No pending users to approve.</div>
+        )}
       </div>
+
+      {/* Row for Searching Users */}
+      <div className="row mt-4">
+        <h4>Search Users</h4>
+        <form onSubmit={(e) => handleUserSearch(e)} className="d-flex mb-3">
+          <input
+            type="text"
+            className="form-control me-2"
+            placeholder="Search by name or email"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button type="submit" className="btn btn-primary">
+            Search
+          </button>
+        </form>
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <div>
+            {searchResults.map((user) => (
+              <div className="row mb-2 align-items-center" key={user.id}>
+                <div className="col-8">
+                  <strong>{user.name}</strong> ({user.email})
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {searchResults.length === 0 && searchTerm && (
+          <div className="alert alert-warning">
+            No users found for "{searchTerm}".
+          </div>
+        )}
+      </div>
+
       {/* Tenders Table */}
       <button className="btn btn-primary" onClick={() => setShowAllTenders(!showAllTenders)}>{showAllTenders ? 'Hide All Tenders' : 'Show All Tenders'}</button>
       {showAllTenders && <table className="table table-striped">
@@ -274,6 +329,7 @@ const EmployeeDashboard = () => {
             <th>Bid Submission End Date</th>
             <th>Tender Value</th>
             <th>Tender URL</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -297,6 +353,7 @@ const EmployeeDashboard = () => {
                 <a href={tender.tender_url} target="_blank" rel="noopener noreferrer">View Tender</a>
               </td>
               <td>
+                <button className="btn btn-danger" onClick={() => handleHideTender(tender._id)}>Hide</button>
               </td>
             </tr>
           ))}
@@ -305,4 +362,4 @@ const EmployeeDashboard = () => {
     </div>
   );
 };
-export default EmployeeDashboard;
+export default AdminDashboard;
