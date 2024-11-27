@@ -7,7 +7,7 @@ import axios from 'axios';
 
 import './index.css';
 
-import LandingPage from './pages/LandingPage'; // Import the LandingPage component
+import LandingPage from './pages/LandingPage';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import UserPage from './pages/UserPage';
 import ComparisonPage from './pages/ComparisonPage';
