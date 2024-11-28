@@ -39,7 +39,11 @@ const UserPage = () => {
                 password,
                 empId
             });
-            alert('Congratulations! You have been registered for now and will be provided acces post approval.');
+            if(response.data.code === 200) {
+                Cookies.set('auth', response.data.token);
+                alert('Congratulations! You have been registered for now and will be provided acces post approval.');
+                return;
+            }
             window.location.href = '/';
         } catch (error) {
             setError(error.response?.data?.message || 'An error occurred. Please try again.');
