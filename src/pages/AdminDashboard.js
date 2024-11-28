@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import cookie from 'react-cookies';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,148 +20,148 @@ const AdminDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAllTenders, setShowAllTenders] = useState(false);
-
-  const [pendingUsers, setPendingUsers] = useState(() => fetchPendingUsers());
-
-  const [searchTerm, setSearchTerm] = useState("");
+  const [pendingUsers, setPendingUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
 
-  async function fetchPendingUsers () {
-    const res = await axios.get(process.env.REACT_APP_BASE_URL + `/admin/pending-users`, {
-        headers: {
-            Authorization: `${Cookies.get('auth')}`
-        }
-    });
-    console.log("lo : ", res.data);
-    return res.data;
-    }
-
-  // Function to approve user
-  async function approveUser(userId, role) {
-    console.log(`User ${userId} approved as Employee`);
-    
-    const res = await axios.post(process.env.REACT_APP_BASE_URL + `/admin/approve-user`, {
-        id: userId,
-        role: role
-    }, {
-        headers: {
-            Authorization: `${Cookies.get('auth')}`
-        }
-    });
-
-    setPendingUsers((prev) => prev.filter((user) => user.id !== userId));
-  };
-
-  // Function to handle search
-  const handleUserSearch = async (e) => {
-    e.preventDefault();
-
-    console.log("searchTerm", Cookies.get('auth'));
-
-    const res = await axios.get(process.env.REACT_APP_BASE_URL + `/admin/search-user`, {}, {
-        params: {
-            search: searchTerm
-        },
-        headers: {
-            Authorization: `${Cookies.get('auth')}`
-        }
-    });
-
-    const mockResults = res.data;
-    setSearchResults(mockResults);
-  };
-
-  function formatNumber(num) {
-    if (num === null || num === undefined) return 'Invalid number';
-  
-    const units = ['', 'K', 'M', 'B', 'T'];
-    const tier = Math.floor(Math.log10(Math.abs(num)) / 3); // Determine the unit tier
-    const suffix = units[tier] || ''; // Get the appropriate suffix
-    const scale = Math.pow(10, tier * 3); // Determine the scale
-    const scaledNum = num / scale; // Scale the number down
-  
-    // Format the number with 2 decimal places if it has decimals, otherwise no decimals
-    return scaledNum.toFixed(scaledNum % 1 !== 0 ? 2 : 0) + suffix;
-  }
   const navigate = useNavigate();
-  const closeModal = () => {
-    setSelectedTender(null);
-    setShowModal(false);
+
+  // Constants
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
+
+  // Utility Function: Format Numbers
+  const formatNumber = (num) => {
+    if (num === null || num === undefined) return 'Invalid number';
+    const units = ['', 'K', 'M', 'B', 'T'];
+    const tier = Math.floor(Math.log10(Math.abs(num)) / 3);
+    const suffix = units[tier] || '';
+    const scale = Math.pow(10, tier * 3);
+    const scaledNum = num / scale;
+    return scaledNum.toFixed(scaledNum % 1 !== 0 ? 2 : 0) + suffix;
   };
 
-  async function handleHideTender(tenderId) {
-    try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/admin/hide-tender`, {
-        params: {
-          tenderId: tenderId
-        },
-        headers: {
-          Authorization: `${Cookies.get('auth')}`
-        }
-      });
-      console.log(res.data);
-      alert("Tender hidden successfully!");
-      fetchTenders();
-    } catch (err) {
-      console.error('Error hiding tender:', err);
-      setErrors(err);
-    }
-  }
-
-  // Fetch all tenders
+  // Fetch All Tenders
   const fetchTenders = useCallback(async () => {
     try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/dashboard/all-tenders`, {
-        params: {
-          page: pageNo,
-          quantity: fetchQuantity,
-          sorting,
-          sortBy
-        },
+      const res = await axios.get(`${BASE_URL}/dashboard/all-tenders`, {
+        params: { page: pageNo, quantity: fetchQuantity, sorting, sortBy },
       });
       setTenders(res.data.data);
     } catch (err) {
       console.error('Error fetching tenders:', err);
       setErrors(err);
     }
-  }, [pageNo, fetchQuantity, sorting, sortBy]);
+  }, [pageNo, fetchQuantity, sorting, sortBy, BASE_URL]);
 
+  // Fetch Pending Users
   const fetchUnapprovedUsers = useCallback(async () => {
     try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/admin/unapproved-users`);
+      const res = await axios.get(`${BASE_URL}/admin/pending-users`, {
+        headers: { Authorization: `${Cookies.get('auth')}` },
+      });
       setPendingUsers(res.data);
     } catch (err) {
       console.error('Error fetching unapproved users:', err);
       setErrors(err);
     }
-  }, [pendingUsers]);
-  
-  // Search tenders based on search value
+  }, [BASE_URL]);
+
+  // Approve User
+  const approveUser = async (userId, role) => {
+    try {
+      await axios.post(
+        `${BASE_URL}/admin/approve-user`,
+        { id: userId, role },
+        { headers: { Authorization: `${Cookies.get('auth')}` } }
+      );
+      setPendingUsers((prev) => prev.filter((user) => user.id !== userId));
+      console.log(`User ${userId} approved as ${role}`);
+    } catch (err) {
+      console.error('Error approving user:', err);
+      setErrors(err);
+    }
+  };
+
+  // Handle Search for Users
+  const handleUserSearch = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.get(`${BASE_URL}/admin/search-user`, {
+        params: { search: searchTerm },
+        headers: { Authorization: `${Cookies.get('auth')}` },
+      });
+      setSearchResults(res.data);
+    } catch (err) {
+      console.error('Error searching users:', err);
+      setErrors(err);
+    }
+  };
+
+  // Hide Tender
+  const handleHideTender = async (tenderId) => {
+    try {
+      await axios.get(`${BASE_URL}/admin/hide-tender`, {
+        params: { tenderId },
+        headers: { Authorization: `${Cookies.get('auth')}` },
+      });
+      alert('Tender hidden successfully!');
+      fetchTenders();
+    } catch (err) {
+      console.error('Error hiding tender:', err);
+      setErrors(err);
+    }
+  };
+
+  // Search Tenders
   const searchTenders = async () => {
     try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/dashboard/search-tenders`, {
-        params: {
-          search: searchValue,
-          page: pageNo,
-          quantity: fetchQuantity,
-          sorting,
-          sortBy,
-        },
+      const res = await axios.get(`${BASE_URL}/dashboard/search-tenders`, {
+        params: { search: searchValue, page: pageNo, quantity: fetchQuantity, sorting, sortBy },
       });
       setTenders(res.data);
     } catch (err) {
+      console.error('Error searching tenders:', err);
       setErrors(err);
-      console.log(err);
     }
   };
-    // Logout Functionality
-    const handleLogout = () => {
-      cookie.remove('auth', { path: '/' });
-      cookie.remove('userWishlist', { path: '/' });
-      cookie.remove('userIncomparison', { path: '/' });
-  
-      navigate('/user-page');
-    };
+
+  const removeUser = async (userId) => {
+    try {
+      await axios.get(
+        `${BASE_URL}/admin/reject-user`,
+        { 
+          headers: { Authorization: `${Cookies.get('auth')}` },
+          params: { id: userId } 
+        }
+      );
+      setPendingUsers((prev) => prev.filter((user) => user.id !== userId));
+      console.log(`User ${userId} rejected`);
+    } catch (err) {
+      console.error('Error rejecting user:', err);
+      setErrors(err);
+    }
+  };
+
+  // Logout Functionality
+  const handleLogout = () => {
+    Cookies.remove('auth', { path: '/' });
+    Cookies.remove('userWishlist', { path: '/' });
+    Cookies.remove('userIncomparison', { path: '/' });
+    navigate('/user-page');
+  };
+
+  // Close Modal
+  const closeModal = () => {
+    setSelectedTender(null);
+    setShowModal(false);
+  };
+
+  // UseEffect Hooks
+  useEffect(() => {
+    fetchTenders();
+    fetchUnapprovedUsers();
+  }, [fetchTenders, fetchUnapprovedUsers]);
+
   return (
     <div className="container" style={{ backgroundColor: isDarkMode ? '#808080' : '#fff', padding: '20px' }}>
       {/* Header */}
@@ -215,7 +214,8 @@ const AdminDashboard = () => {
       {/* Row for Pending Users */}
       <div className="row mt-4">
         <h4>Pending User Approvals</h4>
-        {Object.values(pendingUsers).map((user) => (
+        {!pendingUsers? (<div className="alert alert-info">No pending users to approve.</div>):null}
+        {pendingUsers && Object.values(pendingUsers).map((user) => (
           <div className="row mb-2 align-items-center" key={user.id}>
             <div className="col-4">
               <strong>{user.name}</strong> ({user.email})
@@ -263,6 +263,12 @@ const AdminDashboard = () => {
               <div className="row mb-2 align-items-center" key={user.id}>
                 <div className="col-8">
                   <strong>{user.name}</strong> ({user.email})
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => removeUser(user.id)}
+                  >
+                    Remove User
+                  </button>
                 </div>
               </div>
             ))}
