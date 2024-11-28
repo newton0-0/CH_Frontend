@@ -37,16 +37,16 @@
         },
         {
           "key": "Set-Cookie",
-          "value": "SameSite=None; Secure"
+          "value": "SameSite=None; Secure; HttpOnly"
         }
       ]
     }
   ],
   "redirects": [
     {
-      "source": "https://*.vercel.live",
-      "destination": "https://your-custom-domain.com",
-      "permanent": true
+      "source": "/(.*)",
+      "destination": "https://ch-frontend-ten.vercel.app/$1",
+      "permanent": false
     }
   ]
 }
