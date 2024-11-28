@@ -128,9 +128,9 @@ const TenderDetailsModal = ({ tender, show, onClose }) => {
               <tbody>
                 {Object.entries(tender).map(([key, value]) => (
                   <tr key={key}>
-                    <th style={{ width: '30%' }}>{formatKey(key)}</th>
+                    <th style={{ width: '30%' }}>{( key ==='_id' || key ==='bid_submission_end_date')? '' : formatKey(key)}</th>
                     <td style={{ width: '70%', wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {key.toLowerCase().includes('date') ? formatDate(value) : value || 'N/A'}
+                      {(key ==='_id' || key ==='bid_end_date')? "" : (key.toLowerCase().includes('date') ? formatDate(value) : value || 'N/A')}
                     </td>
                   </tr>
                 ))}
