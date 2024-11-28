@@ -63,7 +63,7 @@ const ComparisonModal = () => {
       .catch((error) => {
         console.error('Error fetching in comparison tenders:', error);
       });
-  }, []);
+  }, [BASE_URL]);
 
   if (!tenders || tenders.length === 0) {
     return <div className="alert alert-info">No tenders available for comparison.</div>;

@@ -62,7 +62,7 @@ const EmployeeDashboard = () => {
       console.error('Error fetching tenders:', err);
       setErrors(err);
     }
-  }, [pageNo, fetchQuantity, sorting, sortBy]);
+  }, [pageNo, fetchQuantity, sorting, sortBy, BASE_URL]);
   // Fetch highlight tenders
   const fetchHighlightTenders = useCallback(async () => {
     try {
@@ -72,7 +72,7 @@ const EmployeeDashboard = () => {
       console.error('Error fetching highlight tenders:', err);
       setErrors(err);
     }
-  }, []);
+  }, [BASE_URL]);
   useEffect(() => {
     fetchTenders();
     fetchHighlightTenders();  // Fetch highlights

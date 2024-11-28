@@ -55,7 +55,7 @@ const App = () => {
     };
 
     checkEmp();
-  }, []);
+  }, [BASE_URL]);
 
   if (isAuthenticated === null) {
     return <div>Loading...</div>; // Display loading state while authentication is being checked

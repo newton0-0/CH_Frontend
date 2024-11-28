@@ -27,7 +27,7 @@ const WishlistModal = () => {
       .catch((error) => {
         console.error('Error fetching wishlist:', error);
       });
-  }, []);
+  }, [BASE_URL]);
 
   // If no wishlist is found, display a message
   if (userWishlist.length === 0) {
