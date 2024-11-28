@@ -26,7 +26,7 @@ const EmployeeDashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAllTenders, setShowAllTenders] = useState(false);
 
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app/api';
 
   function formatNumber(num) {
     if (num === null || num === undefined) return 'Invalid number';

@@ -27,7 +27,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   // Constants
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app/api';
 
   // Utility Function: Format Numbers
   const formatNumber = (num) => {

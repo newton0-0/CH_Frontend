@@ -15,7 +15,7 @@ const ComparisonModal = () => {
 
   const [tenders, setTenders] = useState([null]);
 
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app/api';
 
   async function removeTenderFromComparison(tenderId) {
     try {

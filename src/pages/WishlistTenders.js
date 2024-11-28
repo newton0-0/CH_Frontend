@@ -10,7 +10,7 @@ const WishlistModal = () => {
   const [showModal, setShowModal] = useState(false); // State to handle modal visibility
   const [userWishlist, setUserWishlist] = useState([null]);
 
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app/';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app/api';
   
   // Load wishlist from api call
   useEffect(() => {

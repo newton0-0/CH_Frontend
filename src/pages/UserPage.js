@@ -13,7 +13,7 @@ const UserPage = () => {
     const [redirect, setRedirect] = useState(false);
     const [userType, setUserType] = useState('user');
 
-    const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app';
+    const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app/api';
 
     // Redirect if already logged in
     useEffect(() => {
