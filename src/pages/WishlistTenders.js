@@ -9,11 +9,13 @@ import ClearIcon from '@mui/icons-material/Clear';
 const WishlistModal = () => {
   const [showModal, setShowModal] = useState(false); // State to handle modal visibility
   const [userWishlist, setUserWishlist] = useState([null]);
+
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app/';
   
   // Load wishlist from api call
   useEffect(() => {
     axios
-      .get(process.env.REACT_APP_BASE_URL + '/user/user-wishlist', {
+      .get(BASE_URL + '/user/user-wishlist', {
         headers: {
           Authorization: `${Cookies.get('auth')}`
         }
@@ -38,7 +40,7 @@ const WishlistModal = () => {
 
   const removeTenderFromWishlist = async (tenderId) => {
     try {
-      await axios.get(process.env.REACT_APP_BASE_URL + '/user/remove-from-wishlist', {
+      await axios.get(BASE_URL + '/user/remove-from-wishlist', {
         headers: {
           Authorization: `${Cookies.get('auth')}`
         },

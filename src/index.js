@@ -29,11 +29,13 @@ const NotFound = () => {
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null); // State to hold authentication status
 
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app';
+
   // Check if user is authenticated
   useEffect(() => {
     const checkEmp = async () => {
       try {
-        const response = await axios.get(process.env.REACT_APP_BASE_URL + '/user/verify-token', {
+        const response = await axios.get(BASE_URL + '/user/verify-token', {
           headers: {
             Authorization: `${Cookies.get('auth')}`
           }

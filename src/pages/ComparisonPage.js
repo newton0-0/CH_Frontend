@@ -15,9 +15,11 @@ const ComparisonModal = () => {
 
   const [tenders, setTenders] = useState([null]);
 
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app';
+
   async function removeTenderFromComparison(tenderId) {
     try {
-      const response = await axios.get(process.env.REACT_APP_BASE_URL + `/user/remove-from-comparison`, {
+      const response = await axios.get(BASE_URL + `/user/remove-from-comparison`, {
         params: {
           tenderId: tenderId
         },
@@ -34,7 +36,7 @@ const ComparisonModal = () => {
 
   async function removeAllTendersFromComparison() {
     try {
-      const response = await axios.get(process.env.REACT_APP_BASE_URL + '/user/remove-all-from-comparison', {
+      const response = await axios.get(BASE_URL + '/user/remove-all-from-comparison', {
         headers: {
           Authorization: `${Cookies.get('auth')}`
         }
@@ -49,7 +51,7 @@ const ComparisonModal = () => {
   // Load wishlist from api call
   useEffect(() => {
     axios
-      .get(process.env.REACT_APP_BASE_URL + '/user/user-comparison', {
+      .get(BASE_URL + '/user/user-comparison', {
         headers: {
           Authorization: `${Cookies.get('auth')}`
         }

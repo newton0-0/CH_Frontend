@@ -26,6 +26,8 @@ const EmployeeDashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAllTenders, setShowAllTenders] = useState(false);
 
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app';
+
   function formatNumber(num) {
     if (num === null || num === undefined) return 'Invalid number';
   
@@ -47,7 +49,7 @@ const EmployeeDashboard = () => {
   // Fetch all tenders
   const fetchTenders = useCallback(async () => {
     try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/dashboard/all-tenders`, {
+      const res = await axios.get(BASE_URL + `/dashboard/all-tenders`, {
         params: {
           page: pageNo,
           quantity: fetchQuantity,
@@ -64,7 +66,7 @@ const EmployeeDashboard = () => {
   // Fetch highlight tenders
   const fetchHighlightTenders = useCallback(async () => {
     try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/dashboard/highlight-tenders`);
+      const res = await axios.get(BASE_URL + `/dashboard/highlight-tenders`);
       setHighlightTenders(res.data.data);
     } catch (err) {
       console.error('Error fetching highlight tenders:', err);
@@ -78,7 +80,7 @@ const EmployeeDashboard = () => {
   // Search tenders based on search value
   const searchTenders = async () => {
     try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL + `/dashboard/search-tenders`, {
+      const res = await axios.get(BASE_URL + `/dashboard/search-tenders`, {
         params: {
           search: searchValue,
           page: pageNo,

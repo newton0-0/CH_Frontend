@@ -4,6 +4,8 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+
+
 const UserPage = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -13,6 +15,8 @@ const UserPage = () => {
     const [error, setError] = useState('');
     const [redirect, setRedirect] = useState(false);
     const [userType, setUserType] = useState('user');
+
+    const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://ch-backend.vercel.app';
 
     // Redirect if already logged in
     useEffect(() => {
@@ -33,7 +37,7 @@ const UserPage = () => {
         }
 
         try {
-            const response = await axios.post(process.env.REACT_APP_BASE_URL + '/user/register', {
+            const response = await axios.post(BASE_URL + '/user/register', {
                 name,
                 email,
                 password,
@@ -52,7 +56,7 @@ const UserPage = () => {
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post(process.env.REACT_APP_BASE_URL + '/user/login', {
+            const response = await axios.post(BASE_URL + '/user/login', {
                 email,
                 password
             });
