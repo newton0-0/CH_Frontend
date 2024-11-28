@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-
-
+// 
 const UserPage = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
