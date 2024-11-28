@@ -45,7 +45,7 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "destination": "https://ch-frontend-ten.vercel.app/$1",
+      "destination": "https://ch-frontend-nine.vercel.app/$1",
       "permanent": false
     }
   ]
