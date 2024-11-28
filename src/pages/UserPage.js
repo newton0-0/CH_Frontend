@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -79,7 +78,8 @@ const UserPage = () => {
     };
 
     if (redirect) {
-        return <Navigate to="/employee-dashboard" />;
+        window.location.href = '/employee-dashboard';
+        return;
     }
 
     return (
